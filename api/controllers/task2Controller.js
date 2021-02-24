@@ -6,12 +6,16 @@ exports.execute = function(req, res) {
     var endDate = reqParams.endDate;
     const fetch = require('node-fetch');
 
-    fetch('https://api.coindesk.com/v1/bpi/historical/close.json?start='+startDate+'&end='+endDate)
-        .then(checkStatus)
-        .then(response => response.text())
-        .then(data => {
-            if (testJson(data) == true) {
-                var dataObj = JSON.parse(data);
+    (async () => {
+        try {
+            
+            const response = await fetch('https://api.coindesk.com/v1/bpi/historical/close.json?start='+startDate+'&end='+endDate)
+                .then(checkStatus)
+                .then(response => response.text())
+                .catch(err => console.error(err));
+
+            if (testJson(response) == true) {
+                var dataObj = JSON.parse(response);
 
                 if (dataObj.bpi) {
                     for ( const bpi in dataObj.bpi) {
@@ -19,12 +23,16 @@ exports.execute = function(req, res) {
                         console.log(`${bpi}: ${dataObj.bpi[bpi]}`);
                     }
                 }
-                res.json(dataObj);
+                // res.json(dataObj);
             } else {
-                res.json({error: data});
+                res.json({error: response});
             }
-        })
-        .catch(err => console.error(err));
+
+            await res.json(dataObj);
+        } catch (error) {
+            console.log(error);
+        }
+    })();
 
     function checkStatus(response) {
         if (response.ok) {
