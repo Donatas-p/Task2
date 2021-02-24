@@ -1,11 +1,12 @@
 var express = require('express'),
+    compression = require('compression'),
     app = express(),
     port = process.env.PORT || 3000,
     bodyParser = require('body-parser');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
+app.use(compression());
 app.use((req, res, next) => {
     let validIps = ['::1', '127.0.0.1', '78.57.180.189'];
 
